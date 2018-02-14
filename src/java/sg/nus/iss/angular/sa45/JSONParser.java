@@ -15,15 +15,20 @@ import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JSONParser {
-
+    
+    static final Logger log = Logger.getLogger("sg.nus.iss.angular.sa45.JSONParser");
+    
     static String readStream(InputStream is) {
         StringBuilder sb = new StringBuilder();
         try {
@@ -35,8 +40,8 @@ public class JSONParser {
                 sb.append('\n');
             }
             is.close();
-        } catch (Exception e) {
-            //Log.e("readStream Exception", StackTrace.trace(e));
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, ex.getMessage());
         }
         return (sb.toString());
     }
@@ -59,8 +64,8 @@ public class JSONParser {
             is = conn.getInputStream();
         } catch (UnsupportedEncodingException e) {
             //Log.e("postStream Exception", StackTrace.trace(e));
-        } catch (Exception e) {
-            //Log.e("postStream Exception", StackTrace.trace(e));
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, ex.getMessage());
         }
         return readStream(is);
     }
@@ -69,8 +74,8 @@ public class JSONParser {
         JSONObject jObj = null;
         try {
             jObj = new JSONObject(readStream(is));
-        } catch (JSONException e) {
-            //Log.e("Exception", StackTrace.trace(e));
+        } catch (JSONException ex) {
+            log.log(Level.SEVERE, ex.getMessage());
         }
         return jObj;
     }
@@ -79,8 +84,8 @@ public class JSONParser {
         JSONArray jArray = null;
         try {
             jArray = new JSONArray(readStream(is));
-        } catch (JSONException e) {
-            //Log.e("Exception", StackTrace.trace(e));
+        } catch (JSONException ex) {
+            log.log(Level.SEVERE, ex.getMessage());
         }
         return jArray;
     }

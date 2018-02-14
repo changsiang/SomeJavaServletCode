@@ -35,10 +35,7 @@ public class GiphyServlet extends HttpServlet {
         //Will get pathInfo as  "/userId/collectionName"
         String pathInfo = req.getPathInfo();
         System.out.println(pathInfo);
-        //String[] stringArray = pathInfo.split("/");
-        //System.out.println(stringArray[1]);
         String userId = pathInfo.split("/")[1];
-        //System.out.println(stringArray[0]);
         String collectionName = pathInfo.split("/")[2];
         JsonArrayBuilder giphyArray = Json.createArrayBuilder();
         
@@ -58,7 +55,7 @@ public class GiphyServlet extends HttpServlet {
             giphyArray.add(obj);       
             }
             
-            if(giphyArray.build().size() == 0){
+            if(giphyArray.build().isEmpty()){
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
@@ -75,11 +72,12 @@ public class GiphyServlet extends HttpServlet {
         }catch (Exception ex){
             log(ex.getMessage());
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
         }
     }
     
 
+    //User will hit this method via http://localhost:8080/GiphyProject/collections/ post
+    //User can pass in a plain JSON object in the POST Body
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException{
         
@@ -88,7 +86,7 @@ public class GiphyServlet extends HttpServlet {
         //Currently.. This only deal with one JsonObject at a time.
         //Need to think about parsing an array and one shot update multiple....
         JSONObject obj = JSONParser.getJSONFromUrl(req.getInputStream());
-        System.out.println(obj.toString());
+        //System.out.println(obj.toString());
         try(Connection conn = connPool.getConnection()){
             
             PreparedStatement ps = conn.prepareStatement("INSERT INTO angulargiphy.angulargiphy (giphyId, userId, collectionName) VALUES (? , ?, ?)");
@@ -110,7 +108,6 @@ public class GiphyServlet extends HttpServlet {
         }catch(Exception ex){
             log(ex.getMessage());
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
         }
     }
     
