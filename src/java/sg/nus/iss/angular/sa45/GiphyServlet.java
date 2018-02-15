@@ -2,6 +2,7 @@ package sg.nus.iss.angular.sa45;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -47,27 +48,30 @@ public class GiphyServlet extends HttpServlet{
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 JsonObject obj = Json.createObjectBuilder()
-                        .add("giphyId", rs.getString("giphyId"))
+                        .add("id", rs.getString("id"))
                         .add("userId", rs.getString("userId"))
                         .add("collectionName", rs.getString("collectionName"))
                         .build();
                 giphyArray.add(obj);
             }
-
-            if (giphyArray.build().isEmpty()) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
             //Remember to close ResultSet and Connection
             rs.close();
             conn.close();
-
+            
+            //Here, I put the JSONArray into a JSONObject with the Key "data"
+            //This is will create the same JSON stucture as the Giphy API
+            //So I can reuse the "Data" interface in the Angular code.
+            JsonObject jsonData = Json.createObjectBuilder()
+            .add("data", giphyArray)
+            .build();
+            
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(MediaType.APPLICATION_JSON);
             try (PrintWriter pw = resp.getWriter()) {
-                pw.println(giphyArray.build().toString());
+                pw.println(jsonData.toString());
             }
+            
+
         } catch (Exception ex) {
             log(ex.getMessage());
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -88,7 +92,7 @@ public class GiphyServlet extends HttpServlet{
         //System.out.println(obj.toString());
         try (Connection conn = connPool.getConnection()) {
 
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO angulargiphy.angulargiphy (giphyId, userId, collectionName) VALUES (? , ?, ?)");
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO angulargiphy.angulargiphy (id, userId, collectionName) VALUES (? , ?, ?)");
             for (int i = 0; i < jArray.length(); i++) {
                 ps.setString(1, jArray.getJSONObject(i).getString("id"));
                 ps.setString(2, obj.getString("userId"));
